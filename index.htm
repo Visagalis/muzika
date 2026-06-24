@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natų Mokymosi Žaidimas</title>
+    <!-- Tailwind CSS (iš CDN) kad būtų gražus dizainas -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;900&family=Noto+Serif:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: #f0f9ff; /* sky-50 */
+            touch-action: manipulation; /* pagerina mygtukų paspaudimą telefonuose */
+        }
+        
+        .serif-font {
+            font-family: 'Noto Serif', serif;
+        }
+
+        /* Animacijos */
+        @keyframes bounce-custom {
+            0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+            50% { transform: none; animation-timing-function: cubic-bezier(0,0,0.2,1); }
+        }
+        .animate-bounce-custom {
+            animation: bounce-custom 1s infinite;
+        }
+
+        @keyframes pulse-custom {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .animate-pulse-custom {
+            animation: pulse-custom 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .transition-all-custom {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
+        
+        /* Natos animacijos */
+        .note-correct {
+            transform: scale(1.1);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .note-normal {
+            transform: scale(1);
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 text-slate-800">
+
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border-4 border-sky-200">
+        
+        <!-- Antraštė -->
+        <div class="bg-sky-400 p-4 text-white flex justify-between items-center relative">
+            <div class="flex items-center space-x-2">
+                <!-- Žvaigždės ikona -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-300"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span id="scoreDisplay" class="font-bold text-2xl tracking-wide">0</span>
+            </div>
+            <h1 class="text-xl font-black uppercase tracking-widest absolute left-1/2 -translate-x-1/2 hidden sm:block">
+                Natų Žaidimas
+            </h1>
+            <button id="settingsBtn" class="p-2 bg-sky-500 rounded-full hover:bg-sky-600 transition">
+                <!-- Krumpliaračio ikona -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+        </div>
+
+        <!-- Nustatymai (išskleidžiami) -->
+        <div id="settingsPanel" class="bg-sky-100 p-4 border-b-2 border-sky-200 flex-col gap-4 text-sm font-semibold text-sky-900 hidden">
+            <div>
+                <p class="mb-2 uppercase tracking-wide">Raktas:</p>
+                <div class="flex gap-2">
+                    <button class="setting-clef-btn flex-1 py-2 rounded-xl transition bg-sky-500 text-white" data-mode="treble">Smuiko</button>
+                    <button class="setting-clef-btn flex-1 py-2 rounded-xl transition bg-white hover:bg-sky-50" data-mode="bass">Boso</button>
+                    <button class="setting-clef-btn flex-1 py-2 rounded-xl transition bg-white hover:bg-sky-50" data-mode="both">Mišrus</button>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="mb-2 uppercase tracking-wide">Natų pavadinimai:</p>
+                <div class="flex gap-2">
+                    <button class="setting-not-btn flex-1 py-2 rounded-xl transition bg-sky-500 text-white" data-mode="syl">Do, Re, Mi...</button>
+                    <button class="setting-not-btn flex-1 py-2 rounded-xl transition bg-white hover:bg-sky-50" data-mode="alpha">C, D, E...</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagrindinis žaidimo laukas -->
+        <div class="p-8 flex flex-col items-center relative min-h-[300px] justify-center">
+            
+            <!-- Atsiliepimai -->
+            <div id="feedbackCorrect" class="absolute top-4 flex items-center gap-2 text-green-500 font-bold text-2xl animate-bounce-custom hidden z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Šaunuolis!
+            </div>
+            
+            <div id="feedbackWrong" class="absolute top-2 flex flex-col items-center gap-1 z-10 bg-white/90 p-3 rounded-2xl shadow-sm border border-red-100 hidden">
+                <div class="flex items-center gap-2 text-red-500 font-bold text-2xl animate-pulse-custom">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    Neteisingai
+                </div>
+                <div class="text-lg font-bold text-slate-700">
+                    Tai buvo: <span id="correctAnswerDisplay" class="text-sky-600 text-2xl ml-1"></span>
+                </div>
+            </div>
+
+            <!-- Penklinė (SVG) -->
+            <div class="w-full max-w-sm relative mt-8 mb-4">
+                <svg viewBox="0 0 200 160" class="w-full overflow-visible">
+                    <!-- 5 linijos -->
+                    <line x1="10" y1="40" x2="190" y2="40" stroke="#475569" stroke-width="2" />
+                    <line x1="10" y1="60" x2="190" y2="60" stroke="#475569" stroke-width="2" />
+                    <line x1="10" y1="80" x2="190" y2="80" stroke="#475569" stroke-width="2" />
+                    <line x1="10" y1="100" x2="190" y2="100" stroke="#475569" stroke-width="2" />
+                    <line x1="10" y1="120" x2="190" y2="120" stroke="#475569" stroke-width="2" />
+                    
+                    <!-- Raktas -->
+                    <text id="clefSymbol" class="serif-font" x="15" y="112" font-size="85" fill="#1e293b">𝄞</text>
+
+                    <!-- Nata -->
+                    <g id="noteGroup" class="note-normal" transform-origin="120px 80px">
+                        <!-- Pridėtinės linijos, pridedamos dinamiškai -->
+                        <g id="ledgerLines"></g>
+                        
+                        <!-- Natos galvutė -->
+                        <ellipse id="noteHead" cx="120" cy="80" rx="12" ry="9" fill="#1e293b" transform="rotate(-15 120 80)" />
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Mygtukai (generuojami JS) -->
+        <div class="bg-slate-100 p-6 rounded-t-3xl border-t-2 border-slate-200">
+            <div id="buttonContainer" class="flex flex-wrap justify-center gap-3">
+                <!-- Mygtukai įkeliami čia -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Duomenys ---
+        const TREBLE_NOTES = [
+            { id: 'C4', name: 'C', syl: 'Do', y: 140, ledger: [140] },
+            { id: 'D4', name: 'D', syl: 'Re', y: 130, ledger: [] },
+            { id: 'E4', name: 'E', syl: 'Mi', y: 120, ledger: [] },
+            { id: 'F4', name: 'F', syl: 'Fa', y: 110, ledger: [] },
+            { id: 'G4', name: 'G', syl: 'Sol', y: 100, ledger: [] },
+            { id: 'A4', name: 'A', syl: 'La', y: 90, ledger: [] },
+            { id: 'B4', name: 'B', syl: 'Si', y: 80, ledger: [] },
+            { id: 'C5', name: 'C', syl: 'Do', y: 70, ledger: [] },
+            { id: 'D5', name: 'D', syl: 'Re', y: 60, ledger: [] },
+            { id: 'E5', name: 'E', syl: 'Mi', y: 50, ledger: [] },
+            { id: 'F5', name: 'F', syl: 'Fa', y: 40, ledger: [] },
+            { id: 'G5', name: 'G', syl: 'Sol', y: 30, ledger: [] },
+            { id: 'A5', name: 'A', syl: 'La', y: 20, ledger: [20] }
+        ].map(n => ({ ...n, clef: 'treble' }));
+
+        const BASS_NOTES = [
+            { id: 'E2', name: 'E', syl: 'Mi', y: 140, ledger: [140] },
+            { id: 'F2', name: 'F', syl: 'Fa', y: 130, ledger: [] },
+            { id: 'G2', name: 'G', syl: 'Sol', y: 120, ledger: [] },
+            { id: 'A2', name: 'A', syl: 'La', y: 110, ledger: [] },
+            { id: 'B2', name: 'B', syl: 'Si', y: 100, ledger: [] },
+            { id: 'C3', name: 'C', syl: 'Do', y: 90, ledger: [] },
+            { id: 'D3', name: 'D', syl: 'Re', y: 80, ledger: [] },
+            { id: 'E3', name: 'E', syl: 'Mi', y: 70, ledger: [] },
+            { id: 'F3', name: 'F', syl: 'Fa', y: 60, ledger: [] },
+            { id: 'G3', name: 'G', syl: 'Sol', y: 50, ledger: [] },
+            { id: 'A3', name: 'A', syl: 'La', y: 40, ledger: [] },
+            { id: 'B3', name: 'B', syl: 'Si', y: 30, ledger: [] },
+            { id: 'C4', name: 'C', syl: 'Do', y: 20, ledger: [20] }
+        ].map(n => ({ ...n, clef: 'bass' }));
+
+        const NOTE_OPTIONS_SYL = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+        const NOTE_OPTIONS_ALPHA = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+
+        // --- Būsena ---
+        let state = {
+            clefMode: 'treble',
+            notationMode: 'syl',
+            currentNote: null,
+            score: 0,
+            isWaiting: false // Apsaugo nuo spaudinėjimo kol rodomas rezultatas
+        };
+
+        // --- DOM Elementai ---
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const clefBtns = document.querySelectorAll('.setting-clef-btn');
+        const notBtns = document.querySelectorAll('.setting-not-btn');
+        
+        const feedbackCorrect = document.getElementById('feedbackCorrect');
+        const feedbackWrong = document.getElementById('feedbackWrong');
+        const correctAnswerDisplay = document.getElementById('correctAnswerDisplay');
+        
+        const clefSymbol = document.getElementById('clefSymbol');
+        const noteGroup = document.getElementById('noteGroup');
+        const noteHead = document.getElementById('noteHead');
+        const ledgerLines = document.getElementById('ledgerLines');
+        const buttonContainer = document.getElementById('buttonContainer');
+
+        // --- Funkcijos ---
+
+        function init() {
+            renderButtons();
+            setupEventListeners();
+            pickRandomNote();
+        }
+
+        function pickRandomNote() {
+            let pool = [];
+            if (state.clefMode === 'treble') pool = TREBLE_NOTES;
+            else if (state.clefMode === 'bass') pool = BASS_NOTES;
+            else pool = [...TREBLE_NOTES, ...BASS_NOTES];
+
+            let nextNote;
+            do {
+                const randomIndex = Math.floor(Math.random() * pool.length);
+                nextNote = pool[randomIndex];
+            } while (state.currentNote && nextNote.id === state.currentNote.id);
+
+            state.currentNote = nextNote;
+            state.isWaiting = false;
+            
+            drawNote();
+            resetFeedback();
+            enableButtons();
+        }
+
+        function drawNote() {
+            const note = state.currentNote;
+            
+            // Raktas
+            if (note.clef === 'treble') {
+                clefSymbol.textContent = '𝄞';
+                clefSymbol.setAttribute('x', '15');
+                clefSymbol.setAttribute('y', '112');
+                clefSymbol.setAttribute('font-size', '85');
+            } else {
+                clefSymbol.textContent = '𝄢';
+                clefSymbol.setAttribute('x', '20');
+                clefSymbol.setAttribute('y', '98');
+                clefSymbol.setAttribute('font-size', '75');
+            }
+
+            // Pridėtinės linijos
+            ledgerLines.innerHTML = '';
+            note.ledger.forEach(y => {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', '100');
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', '140');
+                line.setAttribute('y2', y);
+                line.setAttribute('stroke', '#1e293b');
+                line.setAttribute('stroke-width', '3');
+                ledgerLines.appendChild(line);
+            });
+
+            // Galvutė ir rotacija
+            noteGroup.style.transformOrigin = `120px ${note.y}px`;
+            noteHead.setAttribute('cy', note.y);
+            noteHead.setAttribute('transform', `rotate(-15 120 ${note.y})`);
+            noteHead.setAttribute('fill', '#1e293b');
+        }
+
+        function renderButtons() {
+            buttonContainer.innerHTML = '';
+            const options = state.notationMode === 'syl' ? NOTE_OPTIONS_SYL : NOTE_OPTIONS_ALPHA;
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.textContent = opt;
+                btn.className = "guess-btn w-16 h-16 sm:w-20 sm:h-20 bg-white border-b-4 border-slate-300 rounded-2xl shadow-sm text-slate-700 font-bold text-xl sm:text-2xl hover:bg-sky-50 hover:border-sky-300 hover:text-sky-600 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center";
+                btn.onclick = () => handleGuess(opt);
+                buttonContainer.appendChild(btn);
+            });
+        }
+
+        function handleGuess(guessedValue) {
+            if (state.isWaiting) return;
+            state.isWaiting = true;
+            disableButtons();
+
+            const correctValue = state.notationMode === 'syl' ? state.currentNote.syl : state.currentNote.name;
+
+            if (guessedValue === correctValue) {
+                // Teisingai
+                state.score++;
+                scoreDisplay.textContent = state.score;
+                feedbackCorrect.classList.remove('hidden');
+                noteGroup.className.baseVal = "note-correct"; // SVG klasių keitimas
+                
+                setTimeout(() => {
+                    pickRandomNote();
+                }, 1000);
+
+            } else {
+                // Neteisingai (baudos taškai ir teisingas atsakymas)
+                state.score = Math.max(0, state.score - 1);
+                scoreDisplay.textContent = state.score;
+                
+                correctAnswerDisplay.textContent = correctValue;
+                feedbackWrong.classList.remove('hidden');
+                noteHead.setAttribute('fill', '#ef4444'); // Raudona nata
+                
+                setTimeout(() => {
+                    pickRandomNote();
+                }, 2500); // Leidžiame vaikui pažiūrėti atsakymą ilgiau
+            }
+        }
+
+        function resetFeedback() {
+            feedbackCorrect.classList.add('hidden');
+            feedbackWrong.classList.add('hidden');
+            noteGroup.className.baseVal = "note-normal";
+        }
+
+        function disableButtons() {
+            const btns = document.querySelectorAll('.guess-btn');
+            btns.forEach(btn => {
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            });
+        }
+
+        function enableButtons() {
+            const btns = document.querySelectorAll('.guess-btn');
+            btns.forEach(btn => {
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            });
+        }
+
+        function updateSettingButtons(buttonsList, activeMode) {
+            buttonsList.forEach(btn => {
+                if(btn.dataset.mode === activeMode) {
+                    btn.classList.remove('bg-white', 'hover:bg-sky-50');
+                    btn.classList.add('bg-sky-500', 'text-white');
+                } else {
+                    btn.classList.add('bg-white', 'hover:bg-sky-50');
+                    btn.classList.remove('bg-sky-500', 'text-white');
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            // Nustatymų meniu atidarymas
+            settingsBtn.addEventListener('click', () => {
+                settingsPanel.classList.toggle('hidden');
+            });
+
+            // Rakto keitimas
+            clefBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    state.clefMode = e.target.dataset.mode;
+                    updateSettingButtons(clefBtns, state.clefMode);
+                    settingsPanel.classList.add('hidden');
+                    pickRandomNote();
+                });
+            });
+
+            // Natų sistemos keitimas
+            notBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    state.notationMode = e.target.dataset.mode;
+                    updateSettingButtons(notBtns, state.notationMode);
+                    renderButtons();
+                });
+            });
+        }
+
+        // Paleidimas
+        init();
+
+    </script>
+</body>
+</html>
