@@ -57,19 +57,24 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 text-slate-800">
 
-    <div class="bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border-4 border-sky-200">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden border-4 border-sky-200 flex flex-col min-h-[550px]">
         
         <!-- Antraštė -->
         <div class="bg-sky-400 p-4 text-white flex justify-between items-center relative">
-            <div class="flex items-center space-x-2">
-                <!-- Žvaigždės ikona -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-300"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                <span id="scoreDisplay" class="font-bold text-2xl tracking-wide">0</span>
+            <div class="flex items-center space-x-4">
+                <!-- Laikmatis -->
+                <div class="flex items-center space-x-1 bg-sky-500/50 px-3 py-1 rounded-full border border-sky-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span id="timerDisplay" class="font-bold text-lg font-mono">1:00</span>
+                </div>
+                <!-- Taškai -->
+                <div class="flex items-center space-x-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-300"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span id="scoreDisplay" class="font-bold text-2xl tracking-wide">0</span>
+                </div>
             </div>
-            <h1 class="text-xl font-black uppercase tracking-widest absolute left-1/2 -translate-x-1/2 hidden sm:block">
-                Natų Žaidimas
-            </h1>
-            <button id="settingsBtn" class="p-2 bg-sky-500 rounded-full hover:bg-sky-600 transition">
+            
+            <button id="settingsBtn" class="p-2 bg-sky-500 rounded-full hover:bg-sky-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
                 <!-- Krumpliaračio ikona -->
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
@@ -94,8 +99,17 @@
             </div>
         </div>
 
-        <!-- Pagrindinis žaidimo laukas -->
-        <div class="p-8 flex flex-col items-center relative min-h-[300px] justify-center">
+        <!-- Pradžios ekranas -->
+        <div id="startScreen" class="p-8 flex flex-col items-center justify-center flex-1 text-center">
+            <h2 class="text-3xl font-bold text-sky-800 mb-4">Pasiruošę?</h2>
+            <p class="text-slate-600 mb-8 max-w-xs">Turėsite 1 minutę atspėti kuo daugiau natų. Už klaidas taškai minusuojami!</p>
+            <button id="startBtn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold text-xl py-4 px-10 rounded-full shadow-lg transition-transform active:scale-95">
+                Pradėti Žaidimą
+            </button>
+        </div>
+
+        <!-- Pagrindinis žaidimo laukas (Paslėptas pradžioje) -->
+        <div id="gameScreen" class="p-8 flex flex-col items-center relative flex-1 justify-center hidden">
             
             <!-- Atsiliepimai -->
             <div id="feedbackCorrect" class="absolute top-4 flex items-center gap-2 text-green-500 font-bold text-2xl animate-bounce-custom hidden z-10">
@@ -138,8 +152,34 @@
             </div>
         </div>
 
-        <!-- Mygtukai (generuojami JS) -->
-        <div class="bg-slate-100 p-6 rounded-t-3xl border-t-2 border-slate-200">
+        <!-- Pabaigos ekranas (Paslėptas pradžioje) -->
+        <div id="endScreen" class="p-8 flex flex-col items-center justify-center flex-1 text-center hidden">
+            <h2 class="text-3xl font-black text-sky-800 mb-2 uppercase tracking-wide">Laikas baigėsi!</h2>
+            <p class="text-slate-500 font-semibold mb-6">Štai tavo rezultatai:</p>
+            
+            <div class="bg-slate-50 rounded-2xl p-6 w-full mb-8 border-2 border-slate-100 shadow-inner">
+                <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-200">
+                    <span class="text-slate-600 font-bold text-lg">Teisingi atsakymai:</span>
+                    <span id="finalCorrect" class="text-green-500 font-black text-2xl">0</span>
+                </div>
+                <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-200">
+                    <span class="text-slate-600 font-bold text-lg">Klaidos:</span>
+                    <span id="finalWrong" class="text-red-500 font-black text-2xl">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sky-800 font-black text-xl uppercase">Galutiniai taškai:</span>
+                    <span id="finalScore" class="text-sky-600 font-black text-3xl">0</span>
+                </div>
+            </div>
+            
+            <button id="restartBtn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold text-xl py-4 px-10 rounded-full shadow-lg transition-transform active:scale-95 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                Žaisti dar kartą
+            </button>
+        </div>
+
+        <!-- Mygtukai (generuojami JS, Paslėpti pradžioje) -->
+        <div id="controlsArea" class="bg-slate-100 p-6 rounded-t-3xl border-t-2 border-slate-200 hidden">
             <div id="buttonContainer" class="flex flex-wrap justify-center gap-3">
                 <!-- Mygtukai įkeliami čia -->
             </div>
@@ -183,6 +223,7 @@
 
         const NOTE_OPTIONS_SYL = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
         const NOTE_OPTIONS_ALPHA = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const GAME_DURATION = 60; // sekundės
 
         // --- Būsena ---
         let state = {
@@ -190,19 +231,37 @@
             notationMode: 'syl',
             currentNote: null,
             score: 0,
-            isWaiting: false // Apsaugo nuo spaudinėjimo kol rodomas rezultatas
+            correctCount: 0,
+            wrongCount: 0,
+            isWaiting: false,
+            isPlaying: false,
+            timeLeft: GAME_DURATION,
+            timerInterval: null
         };
 
         // --- DOM Elementai ---
         const scoreDisplay = document.getElementById('scoreDisplay');
+        const timerDisplay = document.getElementById('timerDisplay');
         const settingsBtn = document.getElementById('settingsBtn');
         const settingsPanel = document.getElementById('settingsPanel');
         const clefBtns = document.querySelectorAll('.setting-clef-btn');
         const notBtns = document.querySelectorAll('.setting-not-btn');
         
+        const startScreen = document.getElementById('startScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const endScreen = document.getElementById('endScreen');
+        const controlsArea = document.getElementById('controlsArea');
+        
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        
         const feedbackCorrect = document.getElementById('feedbackCorrect');
         const feedbackWrong = document.getElementById('feedbackWrong');
         const correctAnswerDisplay = document.getElementById('correctAnswerDisplay');
+        
+        const finalCorrect = document.getElementById('finalCorrect');
+        const finalWrong = document.getElementById('finalWrong');
+        const finalScore = document.getElementById('finalScore');
         
         const clefSymbol = document.getElementById('clefSymbol');
         const noteGroup = document.getElementById('noteGroup');
@@ -215,10 +274,74 @@
         function init() {
             renderButtons();
             setupEventListeners();
+        }
+
+        function startGame() {
+            state.score = 0;
+            state.correctCount = 0;
+            state.wrongCount = 0;
+            state.timeLeft = GAME_DURATION;
+            state.isPlaying = true;
+            state.isWaiting = false;
+            
+            updateScoreDisplay();
+            updateTimerDisplay();
+            
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            controlsArea.classList.remove('hidden');
+            settingsBtn.disabled = true; // Neleidžiame keisti nustatymų žaidžiant
+            settingsPanel.classList.add('hidden');
+            
             pickRandomNote();
+            
+            state.timerInterval = setInterval(() => {
+                state.timeLeft--;
+                updateTimerDisplay();
+                
+                if (state.timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(state.timerInterval);
+            state.isPlaying = false;
+            
+            gameScreen.classList.add('hidden');
+            controlsArea.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            settingsBtn.disabled = false;
+            
+            finalCorrect.textContent = state.correctCount;
+            finalWrong.textContent = state.wrongCount;
+            finalScore.textContent = state.score;
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(state.timeLeft / 60);
+            const seconds = state.timeLeft % 60;
+            timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            
+            // Paskutinės 10 sek. tampa raudonos
+            if(state.timeLeft <= 10) {
+                timerDisplay.parentElement.classList.remove('bg-sky-500/50', 'border-sky-300');
+                timerDisplay.parentElement.classList.add('bg-red-500/20', 'border-red-300', 'text-red-600', 'animate-pulse');
+            } else {
+                timerDisplay.parentElement.classList.add('bg-sky-500/50', 'border-sky-300');
+                timerDisplay.parentElement.classList.remove('bg-red-500/20', 'border-red-300', 'text-red-600', 'animate-pulse');
+            }
+        }
+
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = state.score;
         }
 
         function pickRandomNote() {
+            if (!state.isPlaying) return;
+
             let pool = [];
             if (state.clefMode === 'treble') pool = TREBLE_NOTES;
             else if (state.clefMode === 'bass') pool = BASS_NOTES;
@@ -288,7 +411,7 @@
         }
 
         function handleGuess(guessedValue) {
-            if (state.isWaiting) return;
+            if (state.isWaiting || !state.isPlaying) return;
             state.isWaiting = true;
             disableButtons();
 
@@ -297,26 +420,28 @@
             if (guessedValue === correctValue) {
                 // Teisingai
                 state.score++;
-                scoreDisplay.textContent = state.score;
+                state.correctCount++;
+                updateScoreDisplay();
                 feedbackCorrect.classList.remove('hidden');
-                noteGroup.className.baseVal = "note-correct"; // SVG klasių keitimas
+                noteGroup.className.baseVal = "note-correct";
                 
                 setTimeout(() => {
                     pickRandomNote();
-                }, 1000);
+                }, 800); // Šiek tiek pagreitinta, nes žaidžiama laikui
 
             } else {
-                // Neteisingai (baudos taškai ir teisingas atsakymas)
+                // Neteisingai
                 state.score = Math.max(0, state.score - 1);
-                scoreDisplay.textContent = state.score;
+                state.wrongCount++;
+                updateScoreDisplay();
                 
                 correctAnswerDisplay.textContent = correctValue;
                 feedbackWrong.classList.remove('hidden');
-                noteHead.setAttribute('fill', '#ef4444'); // Raudona nata
+                noteHead.setAttribute('fill', '#ef4444');
                 
                 setTimeout(() => {
                     pickRandomNote();
-                }, 2500); // Leidžiame vaikui pažiūrėti atsakymą ilgiau
+                }, 2000); // Trumpesnis laukimas dėl laiko apribojimo
             }
         }
 
@@ -355,9 +480,14 @@
         }
 
         function setupEventListeners() {
+            startBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', startGame);
+
             // Nustatymų meniu atidarymas
             settingsBtn.addEventListener('click', () => {
-                settingsPanel.classList.toggle('hidden');
+                if (!state.isPlaying) { // Leidžiame atidaryti tik ne žaidimo metu
+                    settingsPanel.classList.toggle('hidden');
+                }
             });
 
             // Rakto keitimas
@@ -365,8 +495,6 @@
                 btn.addEventListener('click', (e) => {
                     state.clefMode = e.target.dataset.mode;
                     updateSettingButtons(clefBtns, state.clefMode);
-                    settingsPanel.classList.add('hidden');
-                    pickRandomNote();
                 });
             });
 
